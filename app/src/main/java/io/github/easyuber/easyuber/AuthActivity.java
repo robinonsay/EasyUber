@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -108,8 +110,12 @@ public class AuthActivity extends AppCompatActivity {
 
         webview.setWebViewClient(new WebViewClient() {
             boolean authComplete = false;
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Toast.makeText(activity, "Oh no! " + description, Toast.LENGTH_SHORT).show();
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                String summary = "<html><body></body></html>";
+                view.loadData(summary, "text/html", null);
             }
 
             @Override
@@ -159,6 +165,7 @@ public class AuthActivity extends AppCompatActivity {
                 intent.putExtra("refresh_token", accessToken.get("refresh_token"));
 
                 startActivity(intent);
+                finish();
             } catch (IOException e) {
                 Log.e("IOEXCEPTION in getAuth", e.toString());
 
