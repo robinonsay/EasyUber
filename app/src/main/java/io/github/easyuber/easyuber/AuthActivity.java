@@ -32,61 +32,9 @@ import javax.net.ssl.HttpsURLConnection;
 
 
 public class AuthActivity extends AppCompatActivity {
-
-    private final String CLIENT_ID = "AU9FqUuXs9m1-W62TXtrgU7wY008JI_T";
     private final String AUTH_URL = "https://login.uber.com/oauth/v2/authorize?client_id=" +
-            CLIENT_ID+"&response_type=code";
-    private final String TOKEN_URL = "https://login.uber.com/oauth/v2/token";
-
-    private final String CLIENT_SECRET = "v4CpuSEAOAgB2x9SsO4L8rnU4-euw8qFuRlpgCNk";
-    private final String REDIRECT_URL = "http://localhost?authToken=true";
-
-    private Map<String, String> getAccessToken(final String AUTH_CODE) throws IOException, JSONException {
-        URL url = new URL(TOKEN_URL);
-
-        HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
-        String urlParams = "client_secret="+CLIENT_SECRET+
-                "&client_id="+CLIENT_ID+
-                "&grant_type=authorization_code&redirect_uri="+REDIRECT_URL+
-                "&code="+AUTH_CODE;
-
-        tokenConnection.setRequestMethod("POST");
-        tokenConnection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-        tokenConnection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
-        tokenConnection.setDoOutput(true);
-
-        DataOutputStream dStream = new DataOutputStream(tokenConnection.getOutputStream());
-
-        dStream.writeBytes(urlParams);
-        dStream.flush();
-        dStream.close();
-
-        int responseCode = tokenConnection.getResponseCode();
-
-        String output = "Request URL " + url;
-        output += "\n" + "Request Params " + urlParams;
-        output += "\n" + "Response Code " + responseCode;
-
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(tokenConnection.getInputStream()));
-        String line = "";
-        StringBuilder responseOut = new StringBuilder();
-
-        while((line = br.readLine()) != null){
-            responseOut.append(line);
-        }
-
-        br.close();
-
-        output += "\n" + responseOut.toString();
-        Log.d("OUTPUT", output);
-        JSONObject jsonOut = new JSONObject(responseOut.toString());
-        Map tokenMap = new HashMap<String, String>();
-        tokenMap.put("access_token", jsonOut.getString("access_token"));
-        tokenMap.put("refresh_token", jsonOut.getString("refresh_token"));
-        return tokenMap;
-    }
-
+            UberAPIWrapper.getCLIENT_ID()+"&response_type=code";
+    UberAPI uber = new UberAPI();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,7 +106,7 @@ public class AuthActivity extends AppCompatActivity {
             Map<String,String> accessToken = null;
 
             try {
-                accessToken = getAccessToken(AUTH_CODE);
+                accessToken = uber.getAccessToken(AUTH_CODE);
                 Log.d("ACCESS TOKEN", accessToken.get("access_token"));
 
                 intent.putExtra("access_token", accessToken.get("access_token"));
