@@ -88,7 +88,7 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = new Intent(this, HomeActivity.class);
+        final Intent intent = new Intent(this, MainActivity.class);
 
         WebView webview = new WebView(this);
         getWindow().requestFeature(Window.FEATURE_PROGRESS);
@@ -122,11 +122,9 @@ public class AuthActivity extends AppCompatActivity {
 
                     authComplete = true;
 
-                    new RequestAccessTokenTask().execute(authCode);
-
-                    Toast.makeText(getApplicationContext(),"Authorization Code is: " +
-                            authCode, Toast.LENGTH_SHORT).show();
-
+                    new RequestAccessTokenTask().execute(new DataHolder(authCode, intent));
+                    String summary = "<html><body></body></html>";
+                    view.loadData(summary, "text/html", null);
                 }else if(url.contains("?authToken=")){
                     Uri uri = Uri.parse(url);
                     final Boolean HAS_AUTH_TOKEN =
@@ -145,23 +143,29 @@ public class AuthActivity extends AppCompatActivity {
         });
         webview.loadUrl(AUTH_URL);
     }
-    private class RequestAccessTokenTask extends AsyncTask<String, Void, Map<String, String>>{
-
+    private class RequestAccessTokenTask extends AsyncTask<DataHolder, Void, Map<String, String>>{
         @Override
-        protected Map<String, String> doInBackground(String... params) {
-            final String AUTH_CODE = params[0];
+        protected Map<String, String> doInBackground(DataHolder... params) {
+            final String AUTH_CODE = params[0].getAuthCode();
+            final Intent intent = params[0].getIntent();
             Log.d("AUTH_CODE", AUTH_CODE);
             Map<String,String> accessToken = null;
 
             try {
                 accessToken = getAccessToken(AUTH_CODE);
                 Log.d("ACCESS TOKEN", accessToken.get("access_token"));
+
+                intent.putExtra("access_token", accessToken.get("access_token"));
+                intent.putExtra("refresh_token", accessToken.get("refresh_token"));
+
+                startActivity(intent);
             } catch (IOException e) {
                 Log.e("IOEXCEPTION in getAuth", e.toString());
 
                 for(StackTraceElement el:e.getStackTrace()){
                     Log.e("IOEXCEPTION in getAuth", el.toString());
                 }
+
             } catch (JSONException e) {
                 Log.e("JSON in getAuth", e.toString());
 
@@ -172,10 +176,22 @@ public class AuthActivity extends AppCompatActivity {
 
             return accessToken;
         }
-
-        @Override
-        protected void onPostExecute(Map<String, String> accessToken) {
-            super.onPostExecute(accessToken);
-        }
     }
+}
+class DataHolder{
+    public DataHolder(String authCode, Intent intent) {
+        this.authCode = authCode;
+        this.intent = intent;
+    }
+
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    public Intent getIntent() {
+        return intent;
+    }
+
+    private String authCode;
+    private Intent intent;
 }

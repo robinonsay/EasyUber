@@ -17,17 +17,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        Bundle extras = getIntent().getExtras();
+        Log.d("EXTRAS", new Boolean(extras == null).toString());
+        if(extras != null){
+            setContentView(R.layout.activity_home);
+        }else {
+            setContentView(R.layout.activity_main);
 
-        final Button uberLogin = (Button) findViewById(R.id.uber_login);
-        uberLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent loginIntent = new Intent(v.getContext(), AuthActivity.class);
-                startActivity(loginIntent);
-            }
-        });
-
+            final Button uberLogin = (Button) findViewById(R.id.uber_login);
+            uberLogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent loginIntent = new Intent(v.getContext(), AuthActivity.class);
+                    startActivity(loginIntent);
+                }
+            });
+        }
     }
 }
 
