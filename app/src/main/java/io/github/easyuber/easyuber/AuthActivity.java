@@ -1,13 +1,24 @@
 package io.github.easyuber.easyuber;
 
 import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -41,7 +52,41 @@ public class AuthActivity extends AppCompatActivity {
         });
 
         webview.loadUrl(AUTH_URL);
+        new ReceiveRedirectTask().execute();
 
     }
-    
+
+    private class ReceiveRedirectTask extends AsyncTask<Void, Void, Void>{
+        private final int SOCKET_PORT = 3000;
+        @Override
+        protected Void doInBackground(Void... params) {
+            String authCode = "";
+            try {
+                ServerSocket authSocket = new ServerSocket(SOCKET_PORT);
+                Socket socket = authSocket.accept();
+                InetAddress ip_client = socket.getInetAddress();
+                InputStream inputStream = socket.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String request = reader.readLine();
+                String[] requestParam = request.split(" ");
+                Log.d("READER VALUE", request);
+//                for(String param:requestParam){
+//                    Log.d("GET PARAM", param);
+//                }
+                reader.close();
+                socket.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            long initTime = System.currentTimeMillis();
+//            long timeout = 10000;
+//            while (authCode == "" || timeout > System.currentTimeMillis() - initTime){
+//
+//            }
+            return null;
+        }
+    }
+
 }
