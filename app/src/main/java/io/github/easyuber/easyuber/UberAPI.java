@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
+ * EasyUber
  * Created by robinonsay on 6/3/16.
  */
 public class UberAPI {
@@ -29,7 +30,11 @@ public class UberAPI {
 
     private final String SANDBOX_URL = "https://sandbox-api.uber.com";
 
+    private final String UBER_API_URL = "https://api.uber.com";
+
     private final String PRODUCTS_ENDPOINT = "/v1/products";
+
+    private final String ETA_ENDPOINT = "/v1/estimates/time";
 
     private JSONObject httpsPOSTRequest(URL url, String urlParams)throws IOException, JSONException {
         HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
@@ -68,10 +73,11 @@ public class UberAPI {
         return new JSONObject(responseOut.toString());
     }
 
-    private JSONObject httpsGETRequest(URL url, String urlParams)throws IOException, JSONException {
-        HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
+    private JSONObject httpsPOSTRequest(URL url, String urlParams, String accessToken)throws IOException, JSONException {
 
-        tokenConnection.setRequestMethod("GET");
+        HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
+        tokenConnection.setRequestMethod("POST");
+        tokenConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
         tokenConnection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
         tokenConnection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
         tokenConnection.setDoOutput(true);
@@ -88,6 +94,37 @@ public class UberAPI {
         output += "\n" + "Request Params " + urlParams;
         output += "\n" + "Response Code " + responseCode;
 
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(tokenConnection.getInputStream()));
+        String line = "";
+        StringBuilder responseOut = new StringBuilder();
+
+        while((line = br.readLine()) != null){
+            responseOut.append(line);
+        }
+
+        br.close();
+
+        output += "\n" + responseOut.toString();
+        Log.d("OUTPUT", output);
+
+        return new JSONObject(responseOut.toString());
+    }
+
+    private JSONObject httpsGETRequest(String urlS, String urlParams, String accessToken)throws IOException, JSONException {
+        URL url = new URL(urlS + "?" + urlParams);
+        HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
+        tokenConnection.setRequestMethod("GET");
+        tokenConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+        tokenConnection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
+        tokenConnection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
+
+        int responseCode = tokenConnection.getResponseCode();
+
+        String output = "Request URL " + url;
+        output += "\n" + "Request Params " + urlParams;
+        output += "\n" + "Response Code " + responseCode;
+        Log.d("OUTPUT", output);
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(tokenConnection.getInputStream()));
         String line = "";
@@ -138,14 +175,14 @@ public class UberAPI {
         }
         return tokenMap;
     }
-    public ArrayList<Map<String,String>> getProducts(double latitude, double longitude)throws IOException, JSONException{
-        ArrayList products = new ArrayList<Map<String,String>>();
-        URL url = new URL(SANDBOX_URL+PRODUCTS_ENDPOINT);
+    public ArrayList<Map<String,String>> getProducts(double latitude, double longitude, String accessToken)throws IOException, JSONException{
+        ArrayList products = new ArrayList<>();
+        String url = SANDBOX_URL+PRODUCTS_ENDPOINT;
         String urlParams = "latitude="+latitude+"&longitude="+longitude;
-        JSONObject result = httpsGETRequest(url,urlParams);
+        JSONObject result = httpsGETRequest(url,urlParams, accessToken);
         JSONArray productsJSONArray = result.getJSONArray("products");
         for(int i = 0; i<productsJSONArray.length(); i++){
-            Map map = new HashMap<String,String>();
+            Map map = new HashMap<>();
             JSONObject json = productsJSONArray.getJSONObject(i);
             map.put("capacity",json.getInt("capacity"));
             map.put("description",json.getString("description"));
@@ -157,12 +194,32 @@ public class UberAPI {
             map.put("cancellation_fee",json.getJSONObject("price_details").getDouble("cancellation_fee"));
             map.put("currency_code",json.getJSONObject("price_details").getString("currency_code"));
             map.put("display_name",json.getString("display_name"));
+            map.put("product_id", json.getString("product_id"));
             map.put("shared",json.getBoolean("shared"));
-
+            Map eta = getETA(latitude,longitude, json.getString("product_id"), accessToken);
+            if(eta != null){
+                map.putAll(eta);
+            }
             products.add(map);
         }
         return products;
     }
+
+    public Map<String,String> getETA(double latitude, double longitude, String productID, String accessToken)throws IOException, JSONException{
+        String url = SANDBOX_URL+ETA_ENDPOINT;
+        String urlParams = "start_latitude="+latitude+"&start_longitude="+longitude+"&product_id="+productID;
+        JSONArray result = httpsGETRequest(url,urlParams, accessToken).getJSONArray("times");
+        if(result.length() > 0) {
+            JSONObject product = result.getJSONObject(0);
+            Map map = new HashMap<String,String>();
+            if(product.has("estimate")) {
+                map.put("estimate", product.getInt("estimate"));
+            }
+            return map;
+        }
+        return null;
+    }
+
     public void revokeAccessToken(final String ACCESS_TOKEN) throws IOException, JSONException{
         URL url = new URL(REVOKE_URL);
 
