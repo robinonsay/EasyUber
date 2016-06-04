@@ -184,18 +184,18 @@ public class UberAPI {
         for(int i = 0; i<productsJSONArray.length(); i++){
             Map map = new HashMap<>();
             JSONObject json = productsJSONArray.getJSONObject(i);
-            map.put("capacity",json.getInt("capacity"));
+            map.put("capacity",json.getString("capacity"));
             map.put("description",json.getString("description"));
             map.put("distance_unit",json.getJSONObject("price_details").getString("distance_unit"));
-            map.put("cost_per_minute",json.getJSONObject("price_details").getDouble("cost_per_minute"));
-            map.put("minimum",json.getJSONObject("price_details").getDouble("minimum"));
-            map.put("cost_per_distance",json.getJSONObject("price_details").getDouble("cost_per_distance"));
-            map.put("base",json.getJSONObject("price_details").getDouble("base"));
-            map.put("cancellation_fee",json.getJSONObject("price_details").getDouble("cancellation_fee"));
+            map.put("cost_per_minute",json.getJSONObject("price_details").getString("cost_per_minute"));
+            map.put("minimum",json.getJSONObject("price_details").getString("minimum"));
+            map.put("cost_per_distance",json.getJSONObject("price_details").getString("cost_per_distance"));
+            map.put("base",json.getJSONObject("price_details").getString("base"));
+            map.put("cancellation_fee",json.getJSONObject("price_details").getString("cancellation_fee"));
             map.put("currency_code",json.getJSONObject("price_details").getString("currency_code"));
             map.put("display_name",json.getString("display_name"));
             map.put("product_id", json.getString("product_id"));
-            map.put("shared",json.getBoolean("shared"));
+            map.put("shared",json.getString("shared"));
             Map eta = getETA(latitude,longitude, json.getString("product_id"), accessToken);
             if(eta != null){
                 map.putAll(eta);
@@ -213,7 +213,7 @@ public class UberAPI {
             JSONObject product = result.getJSONObject(0);
             Map map = new HashMap<String,String>();
             if(product.has("estimate")) {
-                map.put("estimate", product.getInt("estimate"));
+                map.put("estimate", product.getString("estimate"));
             }
             return map;
         }
