@@ -61,7 +61,6 @@ public class AuthActivity extends AppCompatActivity {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                super.onReceivedError(view, request, error);
                 String summary = "<html><body></body></html>";
                 view.loadData(summary, "text/html", null);
             }

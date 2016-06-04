@@ -42,6 +42,25 @@ public class UberOrderActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                String address = ADDRESS.getText().toString();
+                Geocoder coder = new Geocoder(UberOrderActivity.this);
+                List<Address> addressList;
+                try {
+                    addressList = coder.getFromLocationName(address,5);
+                    if (address==null) {
+                        return;
+                    }
+                    Address location=addressList.get(0);
+
+
+                    Container container = new Container(extras,Double.toString(location.getLatitude()),
+                            Double.toString(location.getLongitude()), intent, price);
+                    Log.d("UBER", "BEING CALLED");
+                    new CalcPriceTask().execute(container);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
 
@@ -63,7 +82,7 @@ public class UberOrderActivity extends AppCompatActivity {
 
 
                     Container container = new Container(extras,Double.toString(location.getLatitude()),
-                            Double.toString(location.getLongitude()), intent);
+                            Double.toString(location.getLongitude()), intent, price);
                     Log.d("UBER", "BEING CALLED");
                     new CallUberTask().execute(container);
                 } catch (IOException e) {
@@ -74,11 +93,44 @@ public class UberOrderActivity extends AppCompatActivity {
         });
     }
 
-    private class CalcPriceTask extends AsyncTask<Bundle, Void, Void>{
+    private class CalcPriceTask extends AsyncTask<Container, Void, Container>{
 
         @Override
-        protected Void doInBackground(Bundle... params) {
-            return null;
+        protected Container doInBackground(Container... params) {
+            Container container = params[0];
+            String productId = container.getExtras().getString("product_id");
+            String accessToken = container.getExtras().getString("access_token");
+            String startLong = Double.toString(container.getExtras().getDouble("start_longitude"));
+            String startLat = Double.toString(container.getExtras().getDouble("start_latitude"));
+            Log.d("LONG AND LAT", container.getEndLat() + " : " + container.getEndLong());
+            try {
+                Map<String, String> response = uber.getPrice(productId,startLat,startLong,
+                        container.getEndLat(),container.getEndLong(),accessToken);
+                if(response.containsKey("price")){
+                    Log.d("UBER", "PRICE CALCULATED");
+                    container.setDistance(response.get("distance_estimate"));
+                    container.setDuration(response.get("duration_estimate"));
+                    container.setPrice(response.get("price"));
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return container;
+        }
+
+        @Override
+        protected void onPostExecute(Container container) {
+            super.onPostExecute(container);
+            String rawTime = container.getDuration();
+            double time = Double.parseDouble(rawTime)/60;
+            time /= 60;
+            int hours = (int)time;
+            int minutes = (int)(time *60)%60;
+            container.getPriceView().setText(container.getPrice() + " and will be about "+
+                    hours+" hours "+"and "+minutes+" minutes. This ride will be " +container.getDistance() +" miles");
         }
     }
 
@@ -121,6 +173,34 @@ public class UberOrderActivity extends AppCompatActivity {
         private String endLong;
         private String count;
         private Intent intent;
+        private TextView priceView;
+        private String duration;
+        private String distance;
+        private String price;
+
+        public String getPrice() {
+            return price;
+        }
+
+        public void setPrice(String price) {
+            this.price = price;
+        }
+
+        public String getDuration() {
+            return duration;
+        }
+
+        public void setDuration(String duration) {
+            this.duration = duration;
+        }
+
+        public String getDistance() {
+            return distance;
+        }
+
+        public void setDistance(String distance) {
+            this.distance = distance;
+        }
 
         public String getCount() {
             return count;
@@ -130,12 +210,16 @@ public class UberOrderActivity extends AppCompatActivity {
             return intent;
         }
 
-        public Container(Bundle extras, String endLat, String endLong, Intent intent) {
+        public Container(Bundle extras, String endLat, String endLong, Intent intent, TextView priceView) {
             this.extras = extras;
             this.endLat = endLat;
             this.endLong = endLong;
             this.intent = intent;
+            this.priceView = priceView;
+        }
 
+        public TextView getPriceView() {
+            return priceView;
         }
 
         public Container(Bundle extras, String endLat, String endLong, String count) {

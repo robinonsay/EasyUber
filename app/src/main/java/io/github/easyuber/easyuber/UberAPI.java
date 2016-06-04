@@ -39,6 +39,8 @@ public class UberAPI {
 
     private final String REQUEST_ENDPOINT = "/v1/requests";
 
+    private final String PRICE_ENDPOINT = "/v1/requests/estimate";
+
     private JSONObject httpsPOSTRequest(URL url, String urlParams)throws IOException, JSONException {
         HttpsURLConnection tokenConnection = (HttpsURLConnection) url.openConnection();
 
@@ -180,6 +182,7 @@ public class UberAPI {
         return tokenMap;
     }
 
+
     public Map<String, String> callUber(String productID, String startLat, String startLong,
                                         String endLat, String endLong, String accessToken)throws IOException, JSONException{
         URL url = new URL(SANDBOX_URL+REQUEST_ENDPOINT);
@@ -206,6 +209,33 @@ public class UberAPI {
             response.put("location", jsonRequestOut.getString("location"));
             response.put("eta", jsonRequestOut.getString("eta"));
             response.put("surge_multiplier", jsonRequestOut.getString("surge_multiplier"));
+        }
+
+        return response;
+    }
+
+    public Map<String, String> getPrice(String productID, String startLat, String startLong,
+                                        String endLat, String endLong, String accessToken)throws IOException, JSONException{
+        URL url = new URL(SANDBOX_URL+PRICE_ENDPOINT);
+
+//        String urlParams = "product_id="+productID+
+//                "&start_latitude="+startLat+
+//                "&start_longitude="+startLong+
+//                "&end_latitude="+endLat+
+//                "&end_longitude="+endLong;
+        JSONObject urlParams = new JSONObject();
+        urlParams.put("product_id", productID);
+        urlParams.put("start_latitude", startLat);
+        urlParams.put("start_longitude", startLong);
+        urlParams.put("end_latitude", endLat);
+        urlParams.put("end_longitude", endLong);
+
+        JSONObject jsonRequestOut = httpsPOSTRequest(url,urlParams,accessToken);
+        Map response = new HashMap<>();
+        if(jsonRequestOut.has("price")) {
+            response.put("price", jsonRequestOut.getJSONObject("price").getString("display"));
+            response.put("duration_estimate", jsonRequestOut.getJSONObject("trip").getString("duration_estimate"));
+            response.put("distance_estimate", jsonRequestOut.getJSONObject("trip").getString("distance_estimate"));
         }
 
         return response;

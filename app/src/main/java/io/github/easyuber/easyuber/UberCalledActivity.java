@@ -12,9 +12,11 @@ public class UberCalledActivity extends AppCompatActivity {
         setContentView(R.layout.activity_uber_called);
         TextView uberCalledMessage = (TextView) findViewById(R.id.uber_called_textview);
         Bundle extras = getIntent().getExtras();
-        if(extras.getString("driver") != null) {
-            uberCalledMessage.setText("You Uber has been called. " + extras.getString("driver") +
+        if(!extras.getString("driver").equals("null")) {
+            uberCalledMessage.setText("Your Uber has been called. " + extras.getString("driver") +
                     " in a " + extras.getString("vehicle")+"."+" They will arrive in "+extras.getString("eta")+"minutes");
+        }else{
+            uberCalledMessage.setText("Your Uber has been called.");
         }
     }
 }
