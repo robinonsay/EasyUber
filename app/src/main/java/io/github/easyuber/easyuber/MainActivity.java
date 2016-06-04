@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
             TextView errorText = (TextView) findViewById(R.id.home_error_textview);
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             ListView productsList = (ListView) findViewById(R.id.products_listview);
+            Button refresh = (Button) findViewById(R.id.refresh_button);
+
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -59,9 +61,15 @@ public class MainActivity extends AppCompatActivity {
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
             if(location != null) {
-                double longitude = location.getLongitude();
-                double latitude = location.getLatitude();
-                new GetProductsTask().execute(new Container(latitude,longitude, ACCESS_TOKEN));
+                final double LONGITUDE = location.getLongitude();
+                final double LATITUDE = location.getLatitude();
+                new GetProductsTask().execute(new Container(LATITUDE,LONGITUDE, ACCESS_TOKEN));
+                refresh.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new GetProductsTask().execute(new Container(LATITUDE,LONGITUDE, ACCESS_TOKEN));
+                    }
+                });
             }else{
                 errorText.setText("Sorry, we could not get your location at this time");
             }
@@ -90,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ArrayList products = uberAPI.getProducts(params.getLatitude(),params.getLongitude(),
                         params.getAccessToken());
-                adapter = new ProductsListAdapter(MainActivity.this, products);
+                adapter = new ProductsListAdapter(MainActivity.this, products, params);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -106,28 +114,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class Container{
-        double latitude;
-        double longitude;
-        String accessToken;
 
-        public Container(double latitude, double longitude, String accessToken) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.accessToken = accessToken;
-        }
+}
 
-        public double getLatitude() {
-            return latitude;
-        }
+class Container{
+    private double latitude;
+    private double longitude;
+    private String accessToken;
 
-        public double getLongitude() {
-            return longitude;
-        }
+    public Container(double latitude, double longitude, String accessToken) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.accessToken = accessToken;
+    }
 
-        public String getAccessToken() {
-            return accessToken;
-        }
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
     }
 }
 

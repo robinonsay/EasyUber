@@ -33,7 +33,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class AuthActivity extends AppCompatActivity {
     private final String AUTH_URL = "https://login.uber.com/oauth/v2/authorize?client_id=" +
-            UberAPIWrapper.getCLIENT_ID()+"&response_type=code";
+            UberAPIWrapper.getCLIENT_ID()+"&response_type=code&scope=request";
     UberAPI uber = new UberAPI();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
