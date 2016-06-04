@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,17 +23,18 @@ import java.util.Map;
 public class UberOrderActivity extends AppCompatActivity {
 
     UberAPI uber = new UberAPI();
+    private ProgressBar spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_uber_order);
+        spinner = (ProgressBar)findViewById(R.id.progressBar2);
+        spinner.setVisibility(View.GONE);
         final Bundle extras = getIntent().getExtras();
 
         final EditText ADDRESS = (EditText) findViewById(R.id.address_edit_text);
-        final EditText COUNT = (EditText) findViewById(R.id.passengers_edit_text);
         final TextView price = (TextView) findViewById(R.id.price_text_view);
-        final TextView info = (TextView) findViewById(R.id.info_textview);
 
         final Intent intent = new Intent(this, UberCalledActivity.class);
 
@@ -47,16 +49,15 @@ public class UberOrderActivity extends AppCompatActivity {
                 List<Address> addressList;
                 try {
                     addressList = coder.getFromLocationName(address,5);
-                    if (address==null) {
-                        return;
+                    if(!addressList.isEmpty()){
+                        Address location=addressList.get(0);
+
+
+                        Container container = new Container(extras,Double.toString(location.getLatitude()),
+                                Double.toString(location.getLongitude()), intent, price);
+                        Log.d("UBER", "BEING CALLED");
+                        new CalcPriceTask().execute(container);
                     }
-                    Address location=addressList.get(0);
-
-
-                    Container container = new Container(extras,Double.toString(location.getLatitude()),
-                            Double.toString(location.getLongitude()), intent, price);
-                    Log.d("UBER", "BEING CALLED");
-                    new CalcPriceTask().execute(container);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -75,16 +76,15 @@ public class UberOrderActivity extends AppCompatActivity {
                 List<Address> addressList;
                 try {
                     addressList = coder.getFromLocationName(address,5);
-                    if (address==null) {
-                        return;
+                    if(!addressList.isEmpty()) {
+                        Address location = addressList.get(0);
+
+
+                        Container container = new Container(extras, Double.toString(location.getLatitude()),
+                                Double.toString(location.getLongitude()), intent, price);
+                        Log.d("UBER", "BEING CALLED");
+                        new CallUberTask().execute(container);
                     }
-                    Address location=addressList.get(0);
-
-
-                    Container container = new Container(extras,Double.toString(location.getLatitude()),
-                            Double.toString(location.getLongitude()), intent, price);
-                    Log.d("UBER", "BEING CALLED");
-                    new CallUberTask().execute(container);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,6 +94,11 @@ public class UberOrderActivity extends AppCompatActivity {
     }
 
     private class CalcPriceTask extends AsyncTask<Container, Void, Container>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            spinner.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected Container doInBackground(Container... params) {
@@ -124,6 +129,7 @@ public class UberOrderActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Container container) {
             super.onPostExecute(container);
+            spinner.setVisibility(View.GONE);
             String rawTime = container.getDuration();
             double time = Double.parseDouble(rawTime)/60;
             time /= 60;
@@ -135,6 +141,12 @@ public class UberOrderActivity extends AppCompatActivity {
     }
 
     private class CallUberTask extends AsyncTask<Container, Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            spinner.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected Void doInBackground(Container... params) {
@@ -164,6 +176,12 @@ public class UberOrderActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            spinner.setVisibility(View.GONE);
         }
     }
 

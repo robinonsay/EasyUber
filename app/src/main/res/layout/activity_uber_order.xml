@@ -8,38 +8,28 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="io.github.easyuber.easyuber.UberOrderActivity">
-    <TextView
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+
+    <ProgressBar
+        android:id="@+id/progressBar2"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:id="@+id/info_textview"
-        android:text="Please enter destination: "
-        android:textAlignment="viewStart"/>
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
     <EditText
         android:layout_width="wrap_content"
-        android:minWidth="200dp"
+        android:minWidth="300dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/info_textview"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="20dp"
         android:hint="Address"
         android:id="@+id/address_edit_text"/>
-    <EditText
-        android:layout_width="wrap_content"
-        android:minWidth="200dp"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/address_edit_text"
-        android:hint="Passegers"
-        android:phoneNumber="true"
-        android:id="@+id/passengers_edit_text"
-        android:textAlignment="center"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@+id/call_uber_button"
-        android:layout_below="@id/passengers_edit_text"
+        android:layout_below="@id/address_edit_text"
         android:text="Calc Price"
         android:id="@+id/show_price_button"/>
     <TextView
@@ -55,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@id/address_edit_text"
-        android:layout_below="@id/passengers_edit_text"
+        android:layout_below="@id/address_edit_text"
         android:text="Call Uber"
         android:id="@+id/call_uber_button"/>
 

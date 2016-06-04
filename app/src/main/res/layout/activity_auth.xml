@@ -9,5 +9,4 @@
     android:paddingTop="0dp"
     tools:context="io.github.easyuber.easyuber.AuthActivity">
 
-
 </RelativeLayout>

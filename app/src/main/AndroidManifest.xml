@@ -22,8 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".AuthActivity" />
-        <activity android:name=".UberOrderActivity" />
-        <activity android:name=".UberCalledActivity"></activity>
+        <activity android:name=".UberOrderActivity"/>
+        <activity android:name=".UberCalledActivity" />
+        <activity android:name=".HomeActivity"></activity>
     </application>
 
 </manifest>

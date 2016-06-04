@@ -38,12 +38,15 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final Intent intent = new Intent(this, MainActivity.class);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+        final Intent intent = new Intent(this, HomeActivity.class);
 
         WebView webview = new WebView(this);
         getWindow().requestFeature(Window.FEATURE_PROGRESS);
         setContentView(webview);
 
+        setProgressBarIndeterminateVisibility(true);
 
         webview.getSettings().setJavaScriptEnabled(true);
 
