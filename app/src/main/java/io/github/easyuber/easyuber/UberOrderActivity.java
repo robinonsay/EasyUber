@@ -131,12 +131,14 @@ public class UberOrderActivity extends AppCompatActivity {
             super.onPostExecute(container);
             spinner.setVisibility(View.GONE);
             String rawTime = container.getDuration();
-            double time = Double.parseDouble(rawTime)/60;
-            time /= 60;
-            int hours = (int)time;
-            int minutes = (int)(time *60)%60;
-            container.getPriceView().setText(container.getPrice() + " and will be about "+
-                    hours+" hours "+"and "+minutes+" minutes. This ride will be " +container.getDistance() +" miles");
+            if(rawTime != null) {
+                double time = Double.parseDouble(rawTime) / 60;
+                time /= 60;
+                int hours = (int) time;
+                int minutes = (int) (time * 60) % 60;
+                container.getPriceView().setText(container.getPrice() + " and will be about " +
+                        hours + " hours " + "and " + minutes + " minutes. This ride will be " + container.getDistance() + " miles");
+            }
         }
     }
 
