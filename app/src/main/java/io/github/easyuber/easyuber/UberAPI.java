@@ -75,7 +75,7 @@ public class UberAPI {
         output += "\n" + responseOut.toString();
         Log.d("OUTPUT", output);
 
-        return new JSONObject(responseOut.toString());
+        return new JSONObject(responseOut.toString()).put("response_code",responseCode);
     }
 
     private JSONObject httpsPOSTRequest(URL url, JSONObject params, String accessToken)throws IOException, JSONException {
@@ -114,7 +114,7 @@ public class UberAPI {
         output += "\n" + responseOut.toString();
         Log.d("OUTPUT", output);
 
-        return new JSONObject(responseOut.toString());
+        return new JSONObject(responseOut.toString()).put("response_code",responseCode);
     }
 
     private JSONObject httpsGETRequest(String urlS, String urlParams, String accessToken)throws IOException, JSONException {
@@ -145,7 +145,7 @@ public class UberAPI {
         output += "\n" + responseOut.toString();
         Log.d("OUTPUT", output);
 
-        return new JSONObject(responseOut.toString());
+        return new JSONObject(responseOut.toString()).put("response_code",responseCode);
     }
 
     public Map<String, String> getAccessToken(final String AUTH_CODE)
@@ -178,6 +178,7 @@ public class UberAPI {
         Map tokenMap = new HashMap<String, String>();
         if(jsonOut.has("access_token")) {
             tokenMap.put("access_token", jsonOut.getString("access_token"));
+            tokenMap.put("response_code", jsonOut.getString("response_code"));
         }
         return tokenMap;
     }
@@ -201,6 +202,7 @@ public class UberAPI {
 
         JSONObject jsonRequestOut = httpsPOSTRequest(url,urlParams,accessToken);
         Map response = new HashMap<>();
+        response.put("response_code", jsonRequestOut.getString("response_code"));
         if(jsonRequestOut.has("request_id")) {
             response.put("request_id", jsonRequestOut.getString("request_id"));
             response.put("status", jsonRequestOut.getString("status"));
@@ -232,6 +234,7 @@ public class UberAPI {
 
         JSONObject jsonRequestOut = httpsPOSTRequest(url,urlParams,accessToken);
         Map response = new HashMap<>();
+        response.put("response_code",jsonRequestOut.getString("response_code"));
         if(jsonRequestOut.has("price")) {
             response.put("price", jsonRequestOut.getJSONObject("price").getString("display"));
             response.put("duration_estimate", jsonRequestOut.getJSONObject("trip").getString("duration_estimate"));
@@ -263,6 +266,7 @@ public class UberAPI {
             map.put("display_name",json.getString("display_name"));
             map.put("product_id", json.getString("product_id"));
             map.put("shared",json.getString("shared"));
+            map.put("response_code", result.getString("response_code"));
             Map eta = getETA(latitude,longitude, json.getString("product_id"), accessToken);
             if(eta != null){
                 map.putAll(eta);
@@ -279,6 +283,7 @@ public class UberAPI {
         if(result.length() > 0) {
             JSONObject product = result.getJSONObject(0);
             Map map = new HashMap<String,String>();
+            map.put("response_code",product.getString("response_code"));
             if(product.has("estimate")) {
                 map.put("estimate", product.getString("estimate"));
             }
