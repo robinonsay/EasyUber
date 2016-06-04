@@ -84,8 +84,7 @@ public class ProductsListAdapter extends BaseAdapter {
             try {
                 double arrivalTimeMinutes = (Integer.parseInt(eta) / 60.0);
                 int minutes = (int) (arrivalTimeMinutes);
-                int seconds = (int) (arrivalTimeMinutes * (60)) % 60;
-                etaFormated = (seconds>10)?minutes + ":" + seconds:minutes + ":" + "0"+seconds;
+                etaFormated = minutes + " minutes";
             }catch(NumberFormatException e){
                 etaFormated = "Not Available";
             }
